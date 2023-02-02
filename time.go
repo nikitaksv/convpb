@@ -9,11 +9,8 @@ import (
 )
 
 type TimeWrapper interface {
-	Clone() TimeWrapper
-	EmptySetNil() TimeWrapper
-	IsNil() bool
-
-	ToTimestampValue() *timestamppb.Timestamp
+	Commoner[TimeWrapper]
+	ToTimestamp() *timestamppb.Timestamp
 	ToStringValue(format string) *wrapperspb.StringValue
 }
 
@@ -43,7 +40,7 @@ func (t *timeWrapper) EmptySetNil() TimeWrapper {
 	return t
 }
 
-func (t *timeWrapper) ToTimestampValue() *timestamppb.Timestamp {
+func (t *timeWrapper) ToTimestamp() *timestamppb.Timestamp {
 	if t.IsNil() {
 		return nil
 	}
@@ -58,9 +55,7 @@ func (t *timeWrapper) ToStringValue(layout string) *wrapperspb.StringValue {
 }
 
 type TimestampValuer interface {
-	Clone() TimestampValuer
-	EmptySetNil() TimestampValuer
-
+	Commoner[TimestampValuer]
 	ToTimeRef() *time.Time
 	ToTime() time.Time
 	ToSQLNullTime() sql.NullTime
@@ -70,18 +65,18 @@ type timestampValuer struct {
 	value *timestamppb.Timestamp
 }
 
-func (t *timestampValuer) isNil() bool {
+func (t *timestampValuer) IsNil() bool {
 	return t == nil || t.value == nil
 }
 func (t *timestampValuer) Clone() TimestampValuer {
-	if t.isNil() {
+	if t.IsNil() {
 		return &timestampValuer{}
 	}
 	return &timestampValuer{value: timestamppb.New(t.value.AsTime())}
 }
 
 func (t *timestampValuer) EmptySetNil() TimestampValuer {
-	if t.isNil() {
+	if t.IsNil() {
 		return t
 	}
 	if !t.value.IsValid() || t.value.AsTime().IsZero() {
@@ -91,7 +86,7 @@ func (t *timestampValuer) EmptySetNil() TimestampValuer {
 }
 
 func (t *timestampValuer) ToTimeRef() *time.Time {
-	if t.isNil() {
+	if t.IsNil() {
 		return nil
 	}
 	v := t.value.AsTime()
@@ -99,7 +94,7 @@ func (t *timestampValuer) ToTimeRef() *time.Time {
 }
 
 func (t *timestampValuer) ToTime() time.Time {
-	if t.isNil() {
+	if t.IsNil() {
 		return time.Time{}
 	}
 	return t.value.AsTime()
@@ -108,6 +103,6 @@ func (t *timestampValuer) ToTime() time.Time {
 func (t *timestampValuer) ToSQLNullTime() sql.NullTime {
 	return sql.NullTime{
 		Time:  t.ToTime(),
-		Valid: !t.isNil(),
+		Valid: !t.IsNil(),
 	}
 }

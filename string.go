@@ -11,11 +11,8 @@ import (
 )
 
 type StringWrapper interface {
-	Clone() StringWrapper
-	// EmptySetNil empty string set is nil
-	EmptySetNil() StringWrapper
+	Commoner[StringWrapper]
 	CondSetNil(cond string) StringWrapper
-	IsNil() bool
 	ToStringValue() *wrapperspb.StringValue
 	ToTimestamp(layout string) (*timestamppb.Timestamp, error)
 }
@@ -70,12 +67,8 @@ func (s *stringWrapper) ToTimestamp(layout string) (*timestamppb.Timestamp, erro
 }
 
 type StringValuer interface {
-	// Clone cloning value
-	Clone() StringValuer
-	// EmptySetNil empty string set is nil
-	EmptySetNil() StringValuer
-	IsNil() bool
-
+	Commoner[StringValuer]
+	CondSetNil(cond string) StringValuer
 	// ToStringRef returned string reference
 	ToStringRef() *string
 	// ToString returned string. If string empty or nil return empty string
@@ -110,6 +103,15 @@ func (s *stringValuer) EmptySetNil() StringValuer {
 		return s
 	}
 	if s.value.GetValue() == "" {
+		s.value = nil
+	}
+	return s
+}
+func (s *stringValuer) CondSetNil(cond string) StringValuer {
+	if s.IsNil() {
+		return s
+	}
+	if s.value.GetValue() == cond {
 		s.value = nil
 	}
 	return s

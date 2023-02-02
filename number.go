@@ -14,12 +14,7 @@ type number interface {
 }
 
 type NumberValuer interface {
-	// Clone cloning value
-	Clone() NumberValuer
-	// EmptySetNil empty number (0) set is nil
-	EmptySetNil() NumberValuer
-	IsNil() bool
-
+	Commoner[NumberValuer]
 	uintRefValuer
 	uintValuer
 	intRefValuer
@@ -72,10 +67,7 @@ type sqlValuer interface {
 }
 
 type NumberWrapper interface {
-	Clone() NumberWrapper
-	EmptySetNil() NumberWrapper
-	IsNil() bool
-
+	Commoner[NumberWrapper]
 	ToUInt32Value() *wrapperspb.UInt32Value
 	ToUInt64Value() *wrapperspb.UInt64Value
 	ToInt32Value() *wrapperspb.Int32Value

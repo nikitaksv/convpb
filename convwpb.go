@@ -4,9 +4,24 @@ import (
 	"database/sql"
 	"time"
 
+	"google.golang.org/protobuf/types/known/durationpb"
 	"google.golang.org/protobuf/types/known/timestamppb"
 	"google.golang.org/protobuf/types/known/wrapperspb"
 )
+
+type Nillable[T any] interface {
+	EmptySetNil() T
+	IsNil() bool
+}
+
+type Cloner[T any] interface {
+	Clone() T
+}
+
+type Commoner[T any] interface {
+	Cloner[T]
+	Nillable[T]
+}
 
 // Unwrappers
 
@@ -40,6 +55,9 @@ func BoolValue(value *wrapperspb.BoolValue) BoolValuer {
 func Timestamp(value *timestamppb.Timestamp) TimestampValuer {
 	return &timestampValuer{value: value}
 }
+func Duration(value *durationpb.Duration) DurationValuer {
+	return &durationValuer{value: value}
+}
 
 // Wrappers
 
@@ -69,6 +87,12 @@ func TimeRef(value *time.Time) TimeWrapper {
 }
 func Time(value time.Time) TimeWrapper {
 	return &timeWrapper{value: &value}
+}
+func TimeDurationRef(value *time.Duration) DurationWrapper {
+	return &durationWrapper{value: value}
+}
+func TimeDuration(value time.Duration) DurationWrapper {
+	return &durationWrapper{value: &value}
 }
 func SQLNullTime(value sql.NullTime) TimeWrapper {
 	if !value.Valid {

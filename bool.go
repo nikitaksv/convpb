@@ -7,9 +7,7 @@ import (
 )
 
 type BoolWrapper interface {
-	Clone() BoolWrapper
-	EmptySetNil() BoolWrapper
-	IsNil() bool
+	Commoner[BoolWrapper]
 	ToBoolValue() *wrapperspb.BoolValue
 }
 
@@ -47,12 +45,7 @@ func (b *boolWrapper) ToBoolValue() *wrapperspb.BoolValue {
 }
 
 type BoolValuer interface {
-	// Clone cloning value
-	Clone() BoolValuer
-	// EmptySetNil empty boolean (false) set is nil
-	EmptySetNil() BoolValuer
-	IsNil() bool
-
+	Commoner[BoolValuer]
 	ToBoolRef() *bool
 	ToBool() bool
 	ToSQLNullBool() sql.NullBool

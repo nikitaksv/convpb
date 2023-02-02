@@ -1,4 +1,4 @@
-module github.com/nikitaksv/convwpb
+module github.com/nikitaksv/convpb
 
 go 1.18
 

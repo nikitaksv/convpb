@@ -7,10 +7,7 @@ import (
 )
 
 type BytesWrapper interface {
-	Clone() BytesWrapper
-	EmptySetNil() BytesWrapper
-	IsNil() bool
-
+	Commoner[BytesWrapper]
 	ToBytesValue() *wrapperspb.BytesValue
 	ToStringValue() *wrapperspb.StringValue
 }
@@ -56,10 +53,7 @@ func (b *bytesWrapper) ToStringValue() *wrapperspb.StringValue {
 }
 
 type BytesValuer interface {
-	Clone() BytesValuer
-	EmptySetNil() BytesValuer
-	IsNil() bool
-
+	Commoner[BytesValuer]
 	ToBuffer() *bytes.Buffer
 	ToBytes() []byte
 	ToStringRef() *string
