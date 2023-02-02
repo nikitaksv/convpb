@@ -55,7 +55,8 @@ func main() {
 	}
 
 	m := &Model{
-		ID:       convpb.StringValue(msg.ID).CondSetNil("0000-0000-0000-0000").ToStringRef(),
+		// Skip "0000-0000-0000-0000" value. Returned empty string ""
+		ID:       convpb.StringValue(msg.ID).CondSetNil("0000-0000-0000-0000").ToString(),
 		String:   convpb.StringValue(msg.String).Clone().ToStringRef(),
 		Float32:  convpb.DoubleValue(msg.Double).ToFloat32(),
 		Time:     convpb.Timestamp(msg.Timestamp).ToSQLNullTime(),
@@ -67,8 +68,19 @@ func main() {
 		panic(err)
 	}
 	fmt.Println(string(bs))
+	/**
+	{
+	  "ID": "",
+	  "String": "string",
+	  "Float32": 11.99,
+	  "Time": {
+	    "Time": "0001-01-01T00:00:00Z",
+	    "Valid": false
+	  },
+	  "Duration": 1000000000000
+	}
+	 */
 }
-
 ```
 
 ### Convert types from golang to proto
@@ -82,6 +94,7 @@ import (
 	"fmt"
 	"time"
 
+	"github.com/nikitaksv/convpb"
 	"google.golang.org/protobuf/types/known/durationpb"
 	"google.golang.org/protobuf/types/known/timestamppb"
 	"google.golang.org/protobuf/types/known/wrapperspb"
@@ -105,22 +118,22 @@ type Model struct {
 
 func main() {
 	str := "string"
-	dur := time.Second * 100
+	dur := time.Duration(0)
 
 	m := &Model{
 		ID:       "0000-0000-0000-0000",
 		String:   &str,
 		Float32:  123.123,
-		Time:     sql.NullTime{Time: time.Now(), Valie: true},
+		Time:     sql.NullTime{Time: time.Now(), Valid: true},
 		Duration: &dur,
 	}
 
 	msg := &ProtoMsg{
 		ID:        convpb.String(m.ID).CondSetNil("0000-0000-0000-0000").ToStringValue(),
-		String:    convpb.String(m.ID).ToStringValue(),
+		String:    convpb.StringRef(m.String).ToStringValue(),
 		Double:    convpb.Number(m.Float32).ToDoubleValue(),
 		Timestamp: convpb.SQLNullTime(m.Time).ToTimestamp(),
-		Duration:  convpb.TimeDurationRef(m.dur).ToDuration(),
+		Duration:  convpb.TimeDurationRef(m.Duration).EmptySetNil().ToDuration(),
 	}
 
 	bs, err := json.Marshal(msg)
@@ -128,7 +141,21 @@ func main() {
 		panic(err)
 	}
 	fmt.Println(string(bs))
+	/**
+	{
+	  "ID": null,
+	  "String": {
+	    "value": "string"
+	  },
+	  "Double": {
+	    "value": 123.12300109863281
+	  },
+	  "Timestamp": {
+	    "seconds": 1675346513,
+	    "nanos": 551356625
+	  },
+	  "Duration": null
+	}
+	*/
 }
-
 ```
-
