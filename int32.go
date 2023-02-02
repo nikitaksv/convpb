@@ -1,4 +1,4 @@
-package convwpb
+package convpb
 
 import (
 	"database/sql"
