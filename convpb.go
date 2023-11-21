@@ -96,37 +96,43 @@ func TimeDuration(value time.Duration) DurationWrapper {
 }
 func SQLNullTime(value sql.NullTime) TimeWrapper {
 	if !value.Valid {
-		return nil
+		return TimeRef(nil)
 	}
 	return Time(value.Time)
 }
 func SQLNullBool(value sql.NullBool) BoolWrapper {
 	if !value.Valid {
-		return nil
+		return BoolRef(nil)
 	}
 	return Bool(value.Bool)
 }
 func SQLNullInt64(value sql.NullInt64) NumberWrapper {
 	if !value.Valid {
-		return nil
+		return NumberRef[int64](nil)
 	}
 	return Number(value.Int64)
 }
 func SQLNullInt32(value sql.NullInt32) NumberWrapper {
 	if !value.Valid {
-		return nil
+		return NumberRef[int32](nil)
 	}
 	return Number(value.Int32)
 }
+func SQLNullInt16(value sql.NullInt16) NumberWrapper {
+	if !value.Valid {
+		return NumberRef[int16](nil)
+	}
+	return Number(value.Int16)
+}
 func SQLNullFloat64(value sql.NullFloat64) NumberWrapper {
 	if !value.Valid {
-		return nil
+		return NumberRef[float64](nil)
 	}
 	return Number(value.Float64)
 }
 func SQLNullString(value sql.NullString) StringWrapper {
 	if !value.Valid {
-		return nil
+		return StringRef(nil)
 	}
 	return String(value.String)
 }

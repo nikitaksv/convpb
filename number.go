@@ -3,6 +3,7 @@ package convpb
 import (
 	"database/sql"
 	"fmt"
+	"strconv"
 
 	"google.golang.org/protobuf/types/known/wrapperspb"
 )
@@ -140,5 +141,39 @@ func (w *numberWrapper[T]) ToStringValue() *wrapperspb.StringValue {
 	if w.IsNil() {
 		return nil
 	}
-	return wrapperspb.String(fmt.Sprintf("%d", *w.value))
+
+	return wrapperspb.String(numericToStr(*w.value))
+}
+
+func numericToStr(n any) string {
+	switch v := n.(type) {
+	case int:
+		return strconv.Itoa(v)
+	case int8:
+		return strconv.FormatInt(int64(v), 10)
+	case int16:
+		return strconv.FormatInt(int64(v), 10)
+	case int32:
+		return strconv.FormatInt(int64(v), 10)
+	case int64:
+		return strconv.FormatInt(v, 10)
+	case uint:
+		return strconv.FormatUint(uint64(v), 10)
+	case uint8:
+		return strconv.FormatUint(uint64(v), 10)
+	case uint16:
+		return strconv.FormatUint(uint64(v), 10)
+	case uint32:
+		return strconv.FormatUint(uint64(v), 10)
+	case uint64:
+		return strconv.FormatUint(v, 10)
+	case uintptr:
+		return strconv.FormatUint(uint64(v), 10)
+	case float32:
+		return strconv.FormatFloat(float64(v), 'g', -1, 32)
+	case float64:
+		return strconv.FormatFloat(v, 'g', -1, 64)
+	default:
+		return fmt.Sprintf("%v", v)
+	}
 }
