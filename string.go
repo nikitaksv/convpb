@@ -6,6 +6,7 @@ import (
 	"strings"
 	"time"
 
+	"github.com/google/uuid"
 	"google.golang.org/protobuf/types/known/timestamppb"
 	"google.golang.org/protobuf/types/known/wrapperspb"
 )
@@ -81,6 +82,10 @@ type StringValuer interface {
 	ToBuffer() *bytes.Buffer
 	// ToBytes returned slice of bytes
 	ToBytes() []byte
+	ToUUID() (uuid.UUID, error)
+	ToUUIDOrNil() uuid.UUID
+	ToNullUUID() (uuid.NullUUID, error)
+	ToNullUUIDOrNil() uuid.NullUUID
 }
 
 type stringValuer struct {
@@ -161,4 +166,29 @@ func (s *stringValuer) ToBytes() []byte {
 	}
 
 	return []byte(s.ToString())
+}
+func (s *stringValuer) ToUUID() (uuid.UUID, error) {
+	if s.IsNil() {
+		return uuid.Nil, nil
+	}
+
+	return uuid.Parse(s.value.GetValue())
+}
+func (s *stringValuer) ToUUIDOrNil() uuid.UUID {
+	id, _ := s.ToUUID() //nolint:errcheck
+	return id
+}
+func (s *stringValuer) ToNullUUID() (uuid.NullUUID, error) {
+	if s.IsNil() {
+		return uuid.NullUUID{}, nil
+	}
+	id, err := uuid.Parse(s.value.GetValue())
+	if err != nil {
+		return uuid.NullUUID{}, err
+	}
+	return uuid.NullUUID{UUID: id, Valid: true}, nil
+}
+func (s *stringValuer) ToNullUUIDOrNil() uuid.NullUUID {
+	id, _ := s.ToNullUUID() //nolint:errcheck
+	return id
 }

@@ -3,6 +3,11 @@ package convpb
 import (
 	"database/sql"
 	"testing"
+
+	"github.com/google/uuid"
+	"github.com/stretchr/testify/assert"
+	"github.com/stretchr/testify/require"
+	"google.golang.org/protobuf/types/known/wrapperspb"
 )
 
 func TestSQL(t *testing.T) {
@@ -57,4 +62,45 @@ func TestNumberWrapper_ToStringValue(t *testing.T) {
 			t.Fatalf("v(%s) != cas.out(%s)", v, cas.out)
 		}
 	}
+}
+
+func TestUUIDWrapper(t *testing.T) {
+	id := uuid.New()
+	w := UUID(id)
+	assert.False(t, w.IsNil())
+	assert.Equal(t, w.ToStringValue(), wrapperspb.String(id.String()))
+	assert.Equal(t, w.ToString(), id.String())
+	assert.True(t, w.CondSetNil(id).IsNil())
+}
+
+func TestStringValuer_UUID(t *testing.T) {
+	id := uuid.New()
+	s := wrapperspb.String(id.String())
+	v := StringValue(s)
+
+	pid, err := v.ToUUID()
+	require.NoError(t, err)
+	assert.Equal(t, pid, id)
+	assert.Equal(t, v.ToUUIDOrNil(), id)
+
+	pnid, err := v.ToNullUUID()
+	require.NoError(t, err)
+	assert.Equal(t, pnid, uuid.NullUUID{UUID: id, Valid: true})
+	assert.Equal(t, v.ToNullUUIDOrNil(), uuid.NullUUID{UUID: id, Valid: true})
+}
+
+func TestStringValuer_UUID_error(t *testing.T) {
+	id := "asd"
+	s := wrapperspb.String(id)
+	v := StringValue(s)
+
+	pid, err := v.ToUUID()
+	require.Error(t, err)
+	assert.Equal(t, pid, uuid.Nil)
+	assert.Equal(t, v.ToUUIDOrNil(), uuid.Nil)
+
+	pnid, err := v.ToNullUUID()
+	require.Error(t, err)
+	assert.Equal(t, pnid, uuid.NullUUID{})
+	assert.Equal(t, v.ToNullUUIDOrNil(), uuid.NullUUID{})
 }
