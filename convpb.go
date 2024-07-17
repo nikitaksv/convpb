@@ -4,6 +4,7 @@ import (
 	"database/sql"
 	"time"
 
+	"github.com/google/uuid"
 	"google.golang.org/protobuf/types/known/durationpb"
 	"google.golang.org/protobuf/types/known/timestamppb"
 	"google.golang.org/protobuf/types/known/wrapperspb"
@@ -135,4 +136,10 @@ func SQLNullString(value sql.NullString) StringWrapper {
 		return StringRef(nil)
 	}
 	return String(value.String)
+}
+func UUID(id uuid.UUID) UUIDWrapper {
+	return &uuidWrapper{value: uuid.NullUUID{Valid: true, UUID: id}}
+}
+func NullUUID(id uuid.NullUUID) UUIDWrapper {
+	return &uuidWrapper{value: id}
 }
